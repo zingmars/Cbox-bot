@@ -1,0 +1,25 @@
+#OTG Bot settings file. Please don't touch unless you know specifically what to change, else you might cause a crash.
+#Sat Oct 03 18:15:13 MSK 2015
+daemonPort=9970
+boxtag=0
+fileLog=true
+server=0
+chatLogFile=chat.txt
+logChat=true
+logFile=log.txt
+username=zingmars
+boxid=0
+logFolder=logs
+password=0
+daemonEnabled=true
+isOriginal=False
+maxLogs=100
+consoleLog=true
+avatar=
+refreshRate=4000
+logLevel=1
+enablePlugins=true
+pluginLogFile=plugins.txt
+pluginDirectory=src/BotPlugins
+archiveLogs=true
+logRotate=true

@@ -1,0 +1,15 @@
+#IntelliJ IDEA gitignore list
+.idea/*
+*.ipr
+*.iws
+out/*
+.idea_modules/*
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+logs/*
+*.cfg
+module_otg-bot.xml
+otg-bot.properties
+otg-bot.xml
