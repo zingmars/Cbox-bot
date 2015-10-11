@@ -14,3 +14,5 @@
 *) Fixed plugin: LastSeen should now properly greet specific users if they haven't posted for ~24hrs
 *) There is now a function that allows you to get the current UNIX time. It's in the settings class.
 *) Release.zip should now be extractable by all zip archivers, not just the very modern ones.
+(11.10.2015) v1.1.1
+*) Fixed logic errors in the new plugins

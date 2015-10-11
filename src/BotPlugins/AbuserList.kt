@@ -17,18 +17,19 @@ public class AbuserList : BasePlugin()
             "@ignorelist" -> {
                 var ignored = settings?.GetSetting("AbuserList") as String
                 var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
-                if(message[1] != "") {
+                var commandSize = message.size()
+                if(commandSize == 1 || message[1] == "") {
                     controller?.AddToBoxBuffer("Users banned from using the bot: " + ignored)
-                } else {
+                } else if(commandSize > 1) {
                     if (isAdmin) {
                         if(message[1] == "add") {
-                            if(message[2] == "") {
+                            if(commandSize > 2 && message[2] == "") {
                                 controller?.AddToBoxBuffer("Please enter an username")
                             } else {
                                 AddIgnored(message[2])
                             }
                         } else if (message[1] == "remove") {
-                            if(message[2] == "") {
+                            if(commandSize > 2 && message[2] == "") {
                                 controller?.AddToBoxBuffer("Please enter an username")
                             } else {
                                 if(!RemoveIgnored(message[2])) {

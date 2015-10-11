@@ -18,18 +18,19 @@ public class HonourableUsers : BasePlugin()
             "@admins" -> {
                 var admins = settings?.GetSetting("HonourableUsers").toString()
                 var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
-                if(message[1] != "") {
+                var commandSize = message.size()
+                if(commandSize == 1 || message[1] == "") {
                     controller?.AddToBoxBuffer("Bot administrators: " + admins)
-                } else {
+                } else if(commandSize > 1) {
                     if(isAdmin) {
                         if(message[1] == "add") {
-                            if(message[2] == "") {
-                                controller?.AddToBoxBuffer("Please enter username")
-                            } else {
+                            if(commandSize > 2 && message[2] != "") {
                                 AddAdmin(message[2])
+                            } else {
+                                controller?.AddToBoxBuffer("Please enter username")
                             }
                         } else if (message[1] == "remove") {
-                            if(message[2] == "") {
+                            if(commandSize > 2 && message[2] == "") {
                                 controller?.AddToBoxBuffer("Please enter username")
                             } else {
                                 if(!RemoveAdmin(message[2])) {

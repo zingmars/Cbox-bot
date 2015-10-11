@@ -21,7 +21,7 @@ public class UserCommands : BasePlugin()
             "@help" -> {
                 controller?.AddToBoxBuffer("For more information please see https://github.com/zingmars/Cbox-bot. For feature requests ask zingmars.")
                 controller?.AddToBoxBuffer("@about - About this bot; @lastseen <username> - Output the date of user's last message; @ping - check if I'm alive; @help - display this; @time - time related commands (try help as a parameter")
-                controller?.AddToBoxBuffer("@laststream <username> - Get when an user has last streamed (try @laststream zingmars); @nextstream - OTG's next stream time; @quote - gets a random quote.")
+                controller?.AddToBoxBuffer("@laststream <username> - Get when an user has last streamed (try @laststream zingmars); @nextstream - OTG's next stream time")
                 controller?.AddToBoxBuffer("Available commands:")
             }
             "@about" -> {
