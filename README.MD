@@ -91,8 +91,7 @@ There are couple of notes though:
 
 ------
 # TODO?
-
-A full refactor to make the code consistent would be nice. Plenty of TODO's scattered through the code as well. Even so, this is project is, for all intents and purposes, finished. Feel free to fork and do whatever.
+A full refactor to make the code consistent would be nice. Some TODO's are listed in the TODO file as well. Even so, this is project is, for all intents and purposes, finished. Feel free to fork and do whatever.
 
 ------
 # License

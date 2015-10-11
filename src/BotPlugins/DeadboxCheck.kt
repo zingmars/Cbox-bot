@@ -29,18 +29,24 @@ public class DeadboxCheck : BasePlugin()
     }
     override fun connector(buffer : PluginBufferItem) :Boolean
     {
-        var timeSinceLast = buffer.time.toLong() - lastMessage
-        if(lastMessage != 0L && timeSinceLast >= 3600L) {
-            if(timeSinceLast > RecordTime) {
-                RecordTime = timeSinceLast
-                RecordUsername = buffer.userName
-                controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box and set a new record doing so! This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes.")
-                saveData()
-            } else {
-                controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box. This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes. The longest recorded deadbox was " + (RecordTime.toDouble()/60).toString() + " minutes long and it was broken by " + RecordUsername)
+        try {
+            var timeSinceLast = buffer.time.toLong() - lastMessage
+            if(lastMessage != 0L && timeSinceLast >= 3600L) {
+                if(timeSinceLast > RecordTime) {
+                    RecordTime = timeSinceLast
+                    RecordUsername = buffer.userName
+                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box and set a new record doing so! This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes.")
+                    saveData()
+                } else {
+                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box. This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes. The longest recorded deadbox was " + (RecordTime.toDouble()/60).toString() + " minutes long and it was broken by " + RecordUsername)
+                }
             }
+            lastMessage = settings?.getCurrentTime() as Long
+            return true
+        } catch (e: Exception) {
+            logger?.LogPlugin(this.pluginName as String, "Error: " + e.toString())
+            return false
         }
-        return true
     }
     private fun saveData()
     {

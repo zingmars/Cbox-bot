@@ -20,13 +20,13 @@ public class UserCommands : BasePlugin()
             //TODO: have some sort of database where plugins can register their commands so this command can be automated.
             "@help" -> {
                 controller?.AddToBoxBuffer("For more information please see https://github.com/zingmars/Cbox-bot. For feature requests ask zingmars.")
-                controller?.AddToBoxBuffer("@about - About this bot; @lastseen <username> - Output the date of user's last message; @ping - check if I'm alive; @help - display this")
-                controller?.AddToBoxBuffer("@laststream <username> - Get when an user has last streamed (try @laststream zingmars); @nextstream - OTG's next stream time")
+                controller?.AddToBoxBuffer("@about - About this bot; @lastseen <username> - Output the date of user's last message; @ping - check if I'm alive; @help - display this; @time - time related commands (try help as a parameter")
+                controller?.AddToBoxBuffer("@laststream <username> - Get when an user has last streamed (try @laststream zingmars); @nextstream - OTG's next stream time; @quote - gets a random quote.")
                 controller?.AddToBoxBuffer("Available commands:")
             }
-             "@about" -> {
-                 controller?.AddToBoxBuffer("Hi! My name is " + handher?.username + " and I'm a bot for cbox.ws written in Kotlin. Check me out at: https://github.com/zingmars/Cbox-bot")
-             }
+            "@about" -> {
+                 controller?.AddToBoxBuffer("Hi! My name is " + handler?.username + " and I'm a bot for cbox.ws written in Kotlin. Check me out at: https://github.com/zingmars/Cbox-bot")
+            }
         }
         return true
     }

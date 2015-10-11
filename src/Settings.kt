@@ -176,4 +176,15 @@ public class Settings(private var settingsFileName :String = "settings.cfg", pri
         settingsFile = File(FileName)
         this.LoadSettings()
     }
+    public fun getCurrentTime() :Long
+    {
+        return System.currentTimeMillis() / 1000L
+    }
+    public fun generateTimeString(current :Long, past :Long, endString :String = "") :String
+    {
+        var streamMinutesAgo = (current-past).toDouble()/60
+        var streamHoursAgo = if(streamMinutesAgo/60.0 >= 1.0) {streamMinutesAgo/60.0} else 0.0
+        var streamDaysAgo = if(streamHoursAgo/24.0 >= 1.0) {streamHoursAgo/24.0} else 0.0
+        return if(streamDaysAgo != 0.0) {streamDaysAgo.toString() + " days"+ endString} else if (streamHoursAgo != 0.0) {streamHoursAgo.toString() + " hours" + endString} else {streamMinutesAgo.toString() + " minutes" + endString}
+    }
 }

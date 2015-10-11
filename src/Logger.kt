@@ -269,7 +269,7 @@ public class Logger(private val Settings :Settings) {
     }
     public fun ArchiveOldLogs(log :Boolean = true)
     {
-        val appZip = ZipUtil(logFolder, (System.currentTimeMillis() / 1000L).toString()+"_logs.zip", Settings.GetSetting("logFile"), Settings.GetSetting("chatLogFile"), Settings.GetSetting("pluginLogFile"), if (log) this else null)
+        val appZip = ZipUtil(logFolder, Settings.getCurrentTime().toString()+"_logs.zip", Settings.GetSetting("logFile"), Settings.GetSetting("chatLogFile"), Settings.GetSetting("pluginLogFile"), if (log) this else null)
         appZip.generateFileList()
         appZip.zipIt()
         //Wipe the folder

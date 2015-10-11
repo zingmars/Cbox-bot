@@ -61,8 +61,7 @@ public class TwitchCheck : BasePlugin()
                         } else {
                             var lastStreamDate = user.get(1).toLong()
                             if(lastStreamDate != 0L) {
-                                //var timeString = generateTimeString((System.currentTimeMillis() / 1000L), user.get(0).toLong(), " ago")
-                                var stopTimeString = generateTimeString((System.currentTimeMillis() / 1000L), lastStreamDate, " ago")
+                                var stopTimeString = settings?.generateTimeString(settings?.getCurrentTime() as Long, lastStreamDate, " ago")
                                 var timeString = Date((user.get(0).toLong()*1000))
                                 controller?.AddToBoxBuffer("User last streamed " + timeString + " (stream ended " + stopTimeString + ")")
                             } else {
@@ -103,7 +102,7 @@ public class TwitchCheck : BasePlugin()
                         if(!response.contains("\"stream\":null") && state == "false") {
                             changes = true
 
-                            data.set(0, (System.currentTimeMillis() / 1000L).toString())
+                            data.set(0, settings?.getCurrentTime().toString())
                             stalkList.set(key, data)
                             stalkState.set(key, "true")
 
@@ -119,11 +118,11 @@ public class TwitchCheck : BasePlugin()
                             if(stalkState.get(key) == "true") {
                                 changes = true
 
-                                data.set(1, (System.currentTimeMillis() / 1000L).toString())
+                                data.set(1, settings?.getCurrentTime().toString())
                                 stalkList.set(key, data)
                                 stalkState.set(key, "false")
                                 logger?.LogPlugin(this.pluginName.toString(), "User " + key + " has stopped streaming!")
-                                controller?.AddToBoxBuffer("User " + key + " has stopped streaming. Stream length was " + generateTimeString(data.get(1).toLong(), data.get(0).toLong()) + " minutes")
+                                controller?.AddToBoxBuffer("User " + key + " has stopped streaming. Stream length was " + settings?.generateTimeString(data.get(1).toLong(), data.get(0).toLong()) + " minutes")
                             }
                         }
                     } else {
@@ -151,12 +150,5 @@ public class TwitchCheck : BasePlugin()
                 logger?.LogPlugin(this.pluginName.toString(), "Error: " + e.toString())
             }
         }
-    }
-    private fun generateTimeString(current :Long, past :Long, endString :String = "") :String
-    {
-        var streamMinutesAgo = (current-past).toDouble()/60
-        var streamHoursAgo = if(streamMinutesAgo/60.0 >= 1.0) {streamMinutesAgo/60.0} else 0.0
-        var streamDaysAgo = if(streamHoursAgo/24.0 >= 1.0) {streamHoursAgo/24.0} else 0.0
-        return if(streamDaysAgo != 0.0) {streamDaysAgo.toString() + " days"+ endString} else if (streamHoursAgo != 0.0) {streamHoursAgo.toString() + " hours" + endString} else {streamMinutesAgo.toString() + " minutes" + endString}
     }
 }

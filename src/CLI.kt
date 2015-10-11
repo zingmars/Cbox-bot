@@ -75,7 +75,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
     }
     private fun ActiveConnectionHandler(client :java.net.Socket)
     {
-        val SessionStartTime = System.currentTimeMillis() / 1000L;
+        val SessionStartTime = Settings.getCurrentTime()
         val out = PrintWriter(client.outputStream, true)
         val _in = BufferedReader(InputStreamReader(client.inputStream))
         var connectionActive = true
@@ -110,7 +110,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     //TODO: have all of the functions return some sort of indication of their actions
                     ":quit" -> { // Disconnect
                         if(ConfirmAction(out, _in))  {
-                            Logger.LogMessage(16, "Session lasted " + (System.currentTimeMillis() / 1000L - SessionStartTime).toString() + " seconds")
+                            Logger.LogMessage(16, "Session lasted " + (Settings.getCurrentTime() - SessionStartTime).toString() + " seconds")
                             client.close()
                             connectionActive = false
                         }
@@ -120,7 +120,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     }
                     ":shutdowncli" -> { // Shut down the CLI interface. Warn - can't bring it up without restarting the server.
                         if(ConfirmAction(out, _in)) {
-                            Logger.LogMessage(16, "Session lasted " + (System.currentTimeMillis() / 1000L - SessionStartTime).toString() + " seconds")
+                            Logger.LogMessage(16, "Session lasted " + (Settings.getCurrentTime() - SessionStartTime).toString() + " seconds")
                             Logger.LogMessage(29)
                             client.close()
                             this.stop()
@@ -135,7 +135,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     }
                     ":shutdown" -> {
                         if(ConfirmAction(out, _in)) {
-                            Logger.LogMessage(16, "Session lasted " + (System.currentTimeMillis() / 1000L - SessionStartTime).toString() + " seconds")
+                            Logger.LogMessage(16, "Session lasted " + Settings.getCurrentTime().toString() + " seconds")
                             Logger.LogMessage(55)
                             out.println("Shutdown initiated. Good bye!")
                             connectionActive = false
@@ -335,7 +335,16 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                         Plugins.SetSetting(command[1], command[2])
                         out.println(command[1] + " set to " + command[2])
                     }
-                    //TODO: Create a way to talk directly to plugins from CLI
+                    "plugins.command" -> {
+                        if (command[1] == "" || command[2] == "") {
+                            out.println("Wrong syntax. Syntax - plugins.command <pluginname> <command>")
+                        } else {
+                            var param = command.join(",")
+                            param = param.substring(param.indexOf(",")+1) //Pluginname
+                            param = param.substring(param.indexOf(",")+1) //Command
+                            out.println(Plugins.executeFunction(command[1], param))
+                        }
+                    }
                     else -> {
                         out.println("Unrecognised command")
                     }
@@ -375,9 +384,10 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
     }
     private fun CLIChat(output :PrintWriter, input :BufferedReader, client :java.net.Socket)
     {
+        //TODO: Have CLI chat be independent of input
         // Very hacky CLI chat. It basically relies on timeout interruptions to receive messages and it isn't the most stable thing around.
         //Initialise environment
-        val SessionStartTime = System.currentTimeMillis() / 1000L;
+        val SessionStartTime = Settings.getCurrentTime();
         Logger.LogMessage(57)
         ThreadController.GetCLIBuffer() //Clear buffer
         Box.toCLI = true
@@ -395,7 +405,6 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
             for(msg in ThreadController.GetCLIBuffer()) {
                 output.println(msg)
             }
-
             try {
                 var userInput = input.readLine()
                 when (userInput) {
@@ -403,7 +412,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                         CLIActive = false
                         client.soTimeout = 0
                         Box.toCLI = false
-                        Logger.LogMessage(58, "Session lasted " + (System.currentTimeMillis() / 1000L - SessionStartTime).toString() + " seconds")
+                        Logger.LogMessage(58, "Session lasted " + (Settings.getCurrentTime() - SessionStartTime).toString() + " seconds")
                         ThreadController.GetCLIBuffer()
                         output.print("\u001B[2J")
                     }

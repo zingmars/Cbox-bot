@@ -8,7 +8,6 @@ import java.util.*
 
 public class LastSeen : BasePlugin() {
     var users :TreeMap<String, ArrayList<String>> = TreeMap(String.CASE_INSENSITIVE_ORDER)
-    var HonourableUsers = ArrayList<String>()
     //TODO: Convert the data into a JSON string or something, because if someone uses these characters in their username the loading will be broken
     var dbUserNameSeparator = "="
     var dbUserDataSeparator = "+"
@@ -50,9 +49,7 @@ public class LastSeen : BasePlugin() {
         //Load data saved in the database
         try {
             settings?.checkSetting("LastSeen", true) //Create the settings variable if it doesn't exist, otherwise it will return a fail
-            settings?.checkSetting("LastSeenHonourable", true)
 
-            var savedHonours = settings?.GetSetting("LastSeenHonourable")
             var savedDB = settings?.GetSetting("LastSeen").toString()
             if(savedDB != "")  {
                 var data = savedDB.split(dbRecordSeparator)
@@ -61,9 +58,6 @@ public class LastSeen : BasePlugin() {
                     var userdata = user.split(dbUserNameSeparator)[1].split(dbUserDataSeparator).toArrayList()
                     users.put(username, userdata)
                 }
-            }
-            if(savedHonours != "" && savedHonours != null) {
-                HonourableUsers = savedHonours.split(",").toArrayList()
             }
             //Run a separate thread to save users in the background
             saverThread = Thread(Runnable { this.databaseSaver() })
@@ -83,7 +77,7 @@ public class LastSeen : BasePlugin() {
         if(message[0].toLowerCase() == "@lastseen" && (buffer.privilvl == "mod" || buffer.privilvl == "user")) {
             var user = users.get(message[1])
             if(user != null) {
-                if(message[1].toLowerCase() != handher?.username?.toLowerCase()) {
+                if(message[1].toLowerCase() != handler?.username?.toLowerCase()) {
                     controller?.AddToBoxBuffer(buffer.userName+": User \"" + message[1] + "\" last seen " + Date(user[2].toLong()*1000).toString())
                 } else {
                     controller?.AddToBoxBuffer(buffer.userName+": I'm here!")
@@ -97,7 +91,8 @@ public class LastSeen : BasePlugin() {
         var user = users.get(buffer.userName)
         if(user != null) {
             // Greet Honourable users
-            if(HonourableUsers.contains(buffer.userName) && buffer.time.toLong() - user[2].toLong() > 86400) {
+            var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
+            if(isAdmin && buffer.time.toLong() - user[2].toLong() > 86400) {
                 controller?.AddToBoxBuffer("Welcome back " + buffer.userName + "!")
             }
 

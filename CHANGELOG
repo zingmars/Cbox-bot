@@ -1,2 +1,16 @@
-(29.09.2015) v0.0.0 - Initial commit
-(06.10.2015) v1.0.0 - Initial commit to github
+(29.09.2015) v0.0.0 
++ Initial commit
+(06.10.2015) v1.0.0 
++ Initial commit to github
++ A bot that allows connecting to a cbot.ws chatbox and implements various plugins
+(11.10.2015) v1.1.0
++) You can now set plugin settings from CLI (if they implement the function)
++) Implemented privilege system for plugins.
++) New default plugin - Time manager. Either outputs current time (in any time zone) or time until a specified time/date.
++) New default plugin - You can now ban specific users from using the bot
++) New default plugin - Honourable user (bot admin) manager.
+
+*) Fixed plugin: Deadbox check. The plugin never properly set the time of the last message, so it never worked.
+*) Fixed plugin: LastSeen should now properly greet specific users if they haven't posted for ~24hrs
+*) There is now a function that allows you to get the current UNIX time. It's in the settings class.
+*) Release.zip should now be extractable by all zip archivers, not just the very modern ones.

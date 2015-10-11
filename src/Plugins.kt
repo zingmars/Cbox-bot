@@ -18,6 +18,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
     private val pluginList :MutableList<String> = ArrayList()
     private val plugins                         = ArrayList<BasePlugin>()
     private var refreshRate                     = Settings.GetSetting("refreshRate").toLong()
+    private var abuserList                      = ""
     public  var username                        = ""
 
     init
@@ -25,6 +26,16 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
         if(enabled) {
             if(Settings.checkSetting("username")) username = Settings.GetSetting("username")
             if(!Settings.checkSetting("isAdmin")) Settings.SetSetting("isAdmin", "false")
+            if(pluginSettings.checkSetting("AbuserList", true)) abuserList = pluginSettings.GetSetting("AbuserList")
+            pluginSettings.checkSetting("AbuserList", true)
+            //Add plugin admin
+            //TODO: Manager plugin that allows to do the same things you can do from CLI
+            if(pluginSettings.GetSetting("HonourableUsers") == "") {
+                println("Plugin admin not configured. Please enter new admin(s - comma seperated no spaces) (or leave blank to have no admin, in which case you'll need to manually enter comma seperated nicknames in plugin conf file)")
+                var input = readLine()
+                if(input == "") input = " "
+                pluginSettings.SetSetting("HonourableUsers", input.toString())
+            }
 
             pluginSettings.SetLogger(Logger)
             this.start()
@@ -102,7 +113,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
                 //Run data to plugins
                 for (message in ThreadController.GetPluginBuffer()) {
                     //run through loaded plugin's checklist
-                    if(message.userName != username) {
+                    if(message.userName != username && !pluginSettings.GetSetting("AbuserList").contains(message.userName)) {
                         for(plugin in plugins) {
                             plugin.connector(message)
                         }
@@ -121,8 +132,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
         // We need to go through all of the plugins since we don't keep an index :(
         var i = 0
         for (plugin in plugins) {
-            if(name.toLowerCase() == plugin.pluginName?.toLowerCase())
-            {
+            if(name.toLowerCase() == plugin.pluginName?.toLowerCase()) {
                 plugin.stop()
                 plugins.remove(i)
                 Logger.LogPlugin(plugin.pluginName.toString(), "Unloaded.")
@@ -131,6 +141,14 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
             i++
         }
         return "Plugin not found or already disabled."
+    }
+    public fun executeFunction(pluginName :String, command :String)
+    {
+        for (plugin in plugins) {
+            if(pluginName.toLowerCase() == plugin.pluginName?.toLowerCase()) {
+                plugin.executeCommand(command)
+            }
+        }
     }
     public fun LoadPlugin(name :String) :Int?
     {
@@ -207,5 +225,9 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
     public fun isAdmin() :Boolean
     {
         return Settings.GetSetting("isAdmin").toBoolean()
+    }
+    public fun isPluginAdmin(name :String) :Boolean
+    {
+        return pluginSettings.GetSetting("HonourableUsers").toString().toLowerCase().toString().contains(name.toLowerCase())
     }
 }

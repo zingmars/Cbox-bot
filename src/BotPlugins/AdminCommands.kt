@@ -12,7 +12,7 @@ public class AdminCommands : BasePlugin()
     override fun pubInit() :Boolean
     {
         try {
-            if(handher?.isAdmin() == false) {
+            if(handler?.isAdmin() == false) {
                 throw Exception("User does not have mod rights to the given box. Exiting.")
             }
 

@@ -12,7 +12,7 @@ import ThreadController
 open public class BasePlugin() {
     public var settings    :Settings? = null
     public var logger      :Logger?   = null
-    public var handher     :Plugins?  = null
+    public var handler     :Plugins?  = null
     public var pluginName  :String?   = null
     public var controller  :ThreadController? = null
 
@@ -30,7 +30,7 @@ open public class BasePlugin() {
     {
         this.settings = settings
         this.logger = logger
-        this.handher = pluginsHandler
+        this.handler = pluginsHandler
         this.pluginName = pluginName
         this.controller = controller
         if(this.pubInit()) this.logger?.LogPlugin(pluginName, "Started!")
@@ -45,4 +45,5 @@ open public class BasePlugin() {
     open public fun pubInit() :Boolean { return true } //Initializer
     open public fun connector(buffer :PluginBufferItem) :Boolean { return true } //Receives data from Plugin controller
     open public fun stop() {} //This is run when the plugin is unloaded
+    open public fun executeCommand(command :String) :String { return "Plugin not configured" } //Execute a command
 }

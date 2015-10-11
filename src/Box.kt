@@ -71,6 +71,7 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
     }
     private fun Demon()
     {
+        //TODO: Check login state every couple of hours
         var pingcounter = 0
         while(active) {
             try {
@@ -130,7 +131,7 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
     public fun GetMessages(lastID :String = lastMessageID) :ArrayList<Message>?
     {
         try {
-            var messages = HTTPUtility.GET("http://www"+server+".cbox.ws/box/?sec=ar&boxid="+id+"&boxtag="+tag+"&_v=857&p="+lastID+"&c="+(System.currentTimeMillis() / 1000L).toString()).split("\n").reversed()
+            var messages = HTTPUtility.GET("http://www"+server+".cbox.ws/box/?sec=ar&boxid="+id+"&boxtag="+tag+"&_v=857&p="+lastID+"&c="+Settings.getCurrentTime().toString()).split("\n").reversed()
             var sortedMessages = ArrayList<Message>()
             if(messages.size() > 0) {
                 for (i in 0..messages.size()-2)  {
