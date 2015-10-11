@@ -185,6 +185,6 @@ public class Settings(private var settingsFileName :String = "settings.cfg", pri
         var streamMinutesAgo = (current-past).toDouble()/60
         var streamHoursAgo = if(streamMinutesAgo/60.0 >= 1.0) {streamMinutesAgo/60.0} else 0.0
         var streamDaysAgo = if(streamHoursAgo/24.0 >= 1.0) {streamHoursAgo/24.0} else 0.0
-        return if(streamDaysAgo != 0.0) {(Math.ceil(streamDaysAgo)).toString() + " days " + endString} else if (streamHoursAgo != 0.0) {(Math.ceil(streamHoursAgo)).toString() + " hours " + endString} else {(Math.ceil(streamMinutesAgo)).toString() + " minutes " + endString}
+        return if(streamDaysAgo != 0.0) {(((streamDaysAgo*100).toInt()).toDouble()/100).toString() + " days " + endString} else if (streamHoursAgo != 0.0) {(((streamHoursAgo*100).toInt()).toDouble()/100).toString() + " hours " + endString} else {(((streamMinutesAgo*100).toInt()).toDouble()/100).toString() + " minutes " + endString}
     }
 }

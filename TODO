@@ -1,6 +1,3 @@
-Settings class:
-*) Fix the rounding for generateTimeString.
-
 Cbox class:
 +) Have it check login state every couple of hours
 *) Fix characters going missing when sending a message
