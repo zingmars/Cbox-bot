@@ -61,7 +61,7 @@ public class TwitchCheck : BasePlugin()
                         } else {
                             var lastStreamDate = user.get(1).toLong()
                             if(lastStreamDate != 0L) {
-                                var stopTimeString = settings?.generateTimeString(settings?.getCurrentTime() as Long, lastStreamDate, " ago")
+                                var stopTimeString = settings?.generateTimeString(settings?.getCurrentTime() as Long, lastStreamDate, "ago")
                                 var timeString = Date((user.get(0).toLong()*1000))
                                 controller?.AddToBoxBuffer("User last streamed " + timeString + " (stream ended " + stopTimeString + ")")
                             } else {

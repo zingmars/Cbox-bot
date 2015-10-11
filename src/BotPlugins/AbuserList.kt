@@ -59,7 +59,8 @@ public class AbuserList : BasePlugin()
     {
         var ignorelist = settings?.GetSetting("AbuserList") as String
         if(!ignorelist.contains(name)) {
-            settings?.SetSetting("AbuserList", ignorelist+","+name)
+            var finalstring = ignorelist + if(ignorelist.contains(",")) "," + name
+            settings?.SetSetting("AbuserList", finalstring)
             logger?.LogPlugin(this.pluginName as String, "User ignored: " + name)
             return true
         }
