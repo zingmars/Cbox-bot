@@ -16,3 +16,6 @@
 *) Release.zip should now be extractable by all zip archivers, not just the very modern ones.
 (11.10.2015) v1.1.1
 *) Fixed logic errors in the new plugins
+(12.10.2015) v1.1.2
+*) Fixed the time string rounding algorithm.
+*) Fixed the output of some of the plugins.

@@ -122,7 +122,7 @@ public class TwitchCheck : BasePlugin()
                                 stalkList.set(key, data)
                                 stalkState.set(key, "false")
                                 logger?.LogPlugin(this.pluginName.toString(), "User " + key + " has stopped streaming!")
-                                controller?.AddToBoxBuffer("User " + key + " has stopped streaming. Stream length was " + settings?.generateTimeString(data.get(1).toLong(), data.get(0).toLong()) + " minutes")
+                                controller?.AddToBoxBuffer("User " + key + " has stopped streaming. Stream length was " + settings?.generateTimeString(data.get(1).toLong(), data.get(0).toLong()) + ".")
                             }
                         }
                     } else {

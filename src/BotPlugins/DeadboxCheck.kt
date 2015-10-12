@@ -32,13 +32,14 @@ public class DeadboxCheck : BasePlugin()
         try {
             var timeSinceLast = buffer.time.toLong() - lastMessage
             if(lastMessage != 0L && timeSinceLast >= 3600L) {
+                //TODO: Use generatetimestring
                 if(timeSinceLast > RecordTime) {
                     RecordTime = timeSinceLast
                     RecordUsername = buffer.userName
-                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box and set a new record doing so! This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes.")
+                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box and set a new record doing so! This deadbox lasted " + settings?.generateTimeString(buffer.time.toLong(), lastMessage) + ".")
                     saveData()
                 } else {
-                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box. This deadbox lasted " + (timeSinceLast.toDouble()/60).toString() + " minutes. The longest recorded deadbox was " + (RecordTime.toDouble()/60).toString() + " minutes long and it was broken by " + RecordUsername)
+                    controller?.AddToBoxBuffer("Congratz " + buffer.userName + "! You just revived the box. This deadbox lasted " + settings?.generateTimeString(buffer.time.toLong(), lastMessage) + ". The longest recorded deadbox was " + ((RecordTime.toInt()*100).toDouble()/100).toString() + " minutes long and it was broken by " + RecordUsername)
                 }
             }
             lastMessage = settings?.getCurrentTime() as Long
