@@ -16,9 +16,9 @@ public class Time : BasePlugin()
     override fun connector(buffer : PluginBufferItem) :Boolean
     {
         var message = buffer.message.split(" ")
-        var commandSize = message.size()
+        var commandSize = message.size
         when(message[0].toLowerCase()) {
-            "@time" -> {
+            "!time" -> {
                 var Format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss z")
                 if(commandSize == 1 || message[1] == "") {
                     controller?.AddToBoxBuffer("Current time: " + Format.format(Date()))
@@ -32,7 +32,7 @@ public class Time : BasePlugin()
                     }
                 }
             }
-            "@timeuntil" -> {
+            "!timeuntil" -> {
                 if(commandSize > 1) {
                     var Format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
                     try {

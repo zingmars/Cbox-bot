@@ -40,7 +40,7 @@ public class AdminCommands : BasePlugin()
         //TODO: Rewrite, this is a horrible 2AM energy drink powered way to do this.
         if(DB.containsKey(buffer.extradata)) {
             //Remove from the old entry
-            var keys = DB.keySet().iterator()
+            var keys = DB.keys.iterator()
             while(keys.hasNext())
             {
                 var key = keys.next()
@@ -65,7 +65,7 @@ public class AdminCommands : BasePlugin()
 
         if(changed) {
             var data = ""
-            var keys = DB.keySet().iterator()
+            var keys = DB.keys.iterator()
             while(keys.hasNext()) {
                 var key = keys.next()
                 var user = DB.get(key)
@@ -74,8 +74,8 @@ public class AdminCommands : BasePlugin()
             settings?.SetSetting("IPDB", data)
         }
 
-        if(message[0].toLowerCase() == "@alias") {
-            var keys = DB.keySet().iterator()
+        if(message[0].toLowerCase() == "!alias") {
+            var keys = DB.keys.iterator()
             while(keys.hasNext())
             {
                 var key = keys.next()

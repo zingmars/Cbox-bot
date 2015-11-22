@@ -113,6 +113,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
                 //Run data to plugins
                 for (message in ThreadController.GetPluginBuffer()) {
                     //run through loaded plugin's checklist
+                    //TODO: There's a bug which causes the ignore list to not work
                     if(message.userName != username && !pluginSettings.GetSetting("AbuserList").contains(message.userName)) {
                         for(plugin in plugins) {
                             plugin.connector(message)
@@ -134,7 +135,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
         for (plugin in plugins) {
             if(name.toLowerCase() == plugin.pluginName?.toLowerCase()) {
                 plugin.stop()
-                plugins.remove(i)
+                plugins.removeAt(i)
                 Logger.LogPlugin(plugin.pluginName.toString(), "Unloaded.")
                 return "Success"
             }
@@ -150,7 +151,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
             }
         }
     }
-    public fun LoadPlugin(name :String) :Int?
+    public fun LoadPlugin(name :String) :Boolean
     {
         var source = pluginDirectory+name
         var pluginFile = File(source)
@@ -166,18 +167,23 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
             var instance = cls.newInstance() as BasePlugin
             if (instance.initiate(pluginSettings, Logger, this, ThreadController, pluginName)) {
                 plugins.add(instance)
-                return plugins.size()-1
+                return true
             }
-            return null
+            return true
         } catch (e: Exception) {
             Logger.LogMessage(999, e.toString())
-            return null
+            return false
         }
     }
-    public fun reloadPlugin(name :String)
+    public fun reloadPlugin(name :String) :Boolean
     {
-        this.unloadPlugin(name)
-        this.LoadPlugin(name+".kt")
+        try {
+            this.unloadPlugin(name)
+            this.LoadPlugin(name+".kt")
+            return true
+        } catch (e: Exception) {
+            return false
+        }
     }
     private fun reloadAllPlugins()
     {
@@ -212,7 +218,7 @@ public class Plugins(private val Settings :Settings, private val Logger :Logger,
     private fun generateFileList(node: File = File(pluginDirectory))
     {
         if (node.isFile) {
-            pluginList.add(node.toString().substring(pluginDirectory.length(), node.toString().length()))
+            pluginList.add(node.toString().substring(pluginDirectory.length, node.toString().length))
         }
 
         if (node.isDirectory) {

@@ -26,7 +26,7 @@ public class HTTP(private var Logger :Logger? = null)
 
         var site = URL(URL)
         var postData = Data.toByteArray(StandardCharsets.UTF_8)
-        var postDataLength = postData.size()
+        var postDataLength = postData.size
 
         var connection= site.openConnection() as HttpURLConnection
         connection.doOutput = true

@@ -13,3 +13,4 @@ logs/*
 module_otg-bot.xml
 otg-bot.properties
 otg-bot.xml
+misc/quotes.sql

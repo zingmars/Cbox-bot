@@ -23,7 +23,7 @@ public class LastSeen : BasePlugin() {
                 Thread.sleep(30000) //Save to disk every 30 seconds
                 if(changed) {
                     var data = ""
-                    var keys = users.keySet().iterator()
+                    var keys = users.keys.iterator()
                     var first = true
 
                     while(keys.hasNext()) {
@@ -32,7 +32,7 @@ public class LastSeen : BasePlugin() {
                         if (!first) {
                             data += dbRecordSeparator
                         }
-                        data += key + dbUserNameSeparator + user?.join(dbUserDataSeparator)
+                        data += key + dbUserNameSeparator + user?.joinToString(dbUserDataSeparator)
                         first = false
                     }
 
@@ -74,7 +74,7 @@ public class LastSeen : BasePlugin() {
         var message = buffer.message.split(" ")
 
         // Respond to @lastseen
-        if(message[0].toLowerCase() == "@lastseen" && (buffer.privilvl == "mod" || buffer.privilvl == "user")) {
+        if(message[0].toLowerCase() == "!lastseen" && (buffer.privilvl == "mod" || buffer.privilvl == "user")) {
             var user = users.get(message[1])
             if(user != null) {
                 if(message[1].toLowerCase() != handler?.username?.toLowerCase()) {

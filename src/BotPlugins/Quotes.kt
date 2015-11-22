@@ -16,7 +16,7 @@ public class Quotes : BasePlugin()
     {
         var message = buffer.message.split(" ")
         when(message[0].toLowerCase()) {
-            "@quote" -> {
+            "!quote" -> {
                 var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
                 if(message[1] != "") {
                     // Select specific quote

@@ -15,10 +15,10 @@ public class HonourableUsers : BasePlugin()
     {
         var message = buffer.message.split(" ")
         when(message[0].toLowerCase()) {
-            "@admins" -> {
+            "!admins" -> {
                 var admins = settings?.GetSetting("HonourableUsers").toString()
                 var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
-                var commandSize = message.size()
+                var commandSize = message.size
                 if(commandSize == 1 || message[1] == "") {
                     controller?.AddToBoxBuffer("Bot administrators: " + admins)
                 } else if(commandSize > 1) {
@@ -71,7 +71,7 @@ public class HonourableUsers : BasePlugin()
     {
         var admins = settings?.GetSetting("HonourableUsers") as String
         if(admins.contains(name)) {
-            admins = admins.substring(0, admins.indexOf(name)-1) + admins.substring(admins.indexOf(name)+name.length())
+            admins = admins.substring(0, admins.indexOf(name)-1) + admins.substring(admins.indexOf(name)+name.length)
             settings?.SetSetting("HonourableUsers", admins)
             logger?.LogPlugin(this.pluginName as String, "Removed admin: " + name)
             return true

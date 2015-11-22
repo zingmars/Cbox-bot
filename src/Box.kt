@@ -6,6 +6,7 @@ import Containers.Message
 import Containers.PluginBufferItem
 import Containers.User
 import java.util.*
+import org.unbescape.html.HtmlEscape;
 
 public class Box(private val Settings :Settings, private val Logger :Logger, private val ThreadController :ThreadController)
 {
@@ -22,7 +23,7 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
     private var refreshRate         = Settings.GetSetting("refreshRate").toLong()
     private var adminFailRate       = 0
     private var pingRate            = Math.floor((30000.toLong()/refreshRate).toDouble()).toInt()
-    public  var toCLI                = false
+    public  var toCLI               = false
 
     init
     {
@@ -71,8 +72,8 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
     }
     private fun Demon()
     {
-        //TODO: Check login state every couple of hours
-        var pingcounter = 0
+        var pingCounter = 0
+        var loginCheckCounter = 0
         while(active) {
             try {
                 Thread.sleep(this.refreshRate)
@@ -88,17 +89,34 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
                     }
                 }
 
-                //Load plugin response
+                //Send plugin responses
                 var pluginMessages = ThreadController.GetBoxBuffer()
                 if(pluginMessages.count() > 0) {
                     for(message in pluginMessages) {
-                        SendMessage(message)
+                        if(!SendMessage(message)) {
+                            // False probably means that we aren't logged in anymore, so relog.
+                            this.Reload()
+                        }
                     }
+                    pingCounter = 0
+                    loginCheckCounter = 0
                 } else {
-                    pingcounter++
-                    if(pingcounter == pingRate) {
+                    //If there's nothing to send in a long while, we might want to check if the box is still alive.
+                    pingCounter++
+                    if(pingCounter == pingRate) {
                         KeepAlive()
-                        pingcounter = 0
+                        pingCounter = 0
+                    }
+
+                    //Also check our login state every 60 minutes;
+                    if(loggedIn) {
+                        loginCheckCounter++
+                        if(loginCheckCounter == 3600) {
+                            // If we're admin we can just check someone's IP since the response is smaller, otherwise we check if we're logged in by requesting our profile data.
+                            if(!(this.isAdmin && this.checkAdmin()) || (!this.checkLogin())) {
+                                this.Reload();
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -133,8 +151,8 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
         try {
             var messages = HTTPUtility.GET("http://www"+server+".cbox.ws/box/?sec=ar&boxid="+id+"&boxtag="+tag+"&_v=857&p="+lastID+"&c="+Settings.getCurrentTime().toString()).split("\n").reversed()
             var sortedMessages = ArrayList<Message>()
-            if(messages.size() > 0) {
-                for (i in 0..messages.size()-2)  {
+            if(messages.size > 0) {
+                for (i in 0..messages.size-2)  {
                     var splitMessage = messages[i].split("\t")
                     lastMessageID = splitMessage[0]
 
@@ -182,7 +200,8 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
             // Turn links back to normal text
             post = message[6].replace("<a class=\"autoLink\" href=\"", "")
             post = post.replace("\" target=\"_blank\">[link]</a>", "")
-            //TODO: Turn HTML entities into their respective characters.
+            post = HtmlEscape.unescapeHtml(post);
+
             // I remember that there was a prettier way to turn an array into arguments, yet I can't remember it right now.
             return Message(message[0], message[1], message[2], message[3], message[4], message[5], post, message[7], message[8], message[9])
         } catch (e: Exception) {
@@ -195,14 +214,22 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
     {
         user.SetCredentials(Username, Password, Avatar)
     }
-    private fun checkAdmin()
+    private fun checkAdmin() :Boolean
     {
         var test = getIP()
         if(test != null) {
             isAdmin = true
             Settings.SetSetting("isAdmin", "true")
             Logger.LogMessage(50)
+            return true;
         }
+        return false
+    }
+    private fun checkLogin() :Boolean
+    {
+        var GET = HTTPUtility.GET("http://www"+server+".cbox.ws/box/?sec=getip&boxid="+id+"&boxtag="+tag+"&sec=profile&n="+user.Username+"&k="+user.Key);
+        if(GET.contains("You are logged in as")) return true;
+        else return false;
     }
     private fun LogIn() :Boolean
     {
@@ -212,7 +239,7 @@ public class Box(private val Settings :Settings, private val Logger :Logger, pri
             var POST = HTTPUtility.POST("http://www"+server+".cbox.ws/box/?boxid="+id+"&boxtag="+tag+"&sec=profile&n=" + user.Username + "&k=","pword="+user.Password+"&sublog=+Log+in+")
             if(POST.Content != "null") {
                 var newCookies = POST.Headers.get("Set-Cookie")
-                var newCookiesLength = if(newCookies != null) newCookies.size() else 0
+                var newCookiesLength = if(newCookies != null) newCookies.size else 0
                 if(newCookiesLength != 0) {
                     for (i in 0..newCookiesLength-1) {
                         val cookie = newCookies?.get(i).toString();

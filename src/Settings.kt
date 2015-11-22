@@ -139,7 +139,7 @@ public class Settings(private var settingsFileName :String = "settings.cfg", pri
     public fun GetAllSettings () :String
     {
         var output = ""
-        var keys = settingsContainer.keySet().iterator()
+        var keys = settingsContainer.keys.iterator()
         while(keys.hasNext()) {
             var key = keys.next().toString()
             var data = settingsContainer.get(key)

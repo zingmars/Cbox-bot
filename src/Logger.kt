@@ -15,6 +15,10 @@ public class Logger(private val Settings :Settings) {
     private var pluginLog               = File("logs/plugins.txt")
     private var enableStatus            = true
     private var loadedFile              = false
+    private var logLineRotate           = Settings.GetSetting("logLineRotate").toBoolean()
+    private var lineCount               = Settings.GetSetting("logSysLineCount").toInt()
+    private var pluginLineCount         = Settings.GetSetting("logPluginLineCount").toInt()
+    private var chatLineCount           = Settings.GetSetting("logChatLineCount").toInt()
     private var logLevel :Int           = Settings.GetSetting("logLevel").toInt()
     private val maxLogs :Int            = Settings.GetSetting("maxLogs").toInt()
     private var logFolder :String       = Settings.GetSetting("logFolder")
@@ -28,6 +32,7 @@ public class Logger(private val Settings :Settings) {
     private var logArchiving :Boolean   = Settings.GetSetting("archiveLogs").toBoolean()
     private var logRotate :Boolean      = Settings.GetSetting("logRotate").toBoolean()
 
+    //TODO: rotate log file after certain amount of lines saved
     init
     {
         if (fileLog)  {
@@ -130,6 +135,10 @@ public class Logger(private val Settings :Settings) {
         }
         if(consoleLog) println(loggedString)
         if(fileLog) log.appendText("\n"+loggedString, StandardCharsets.UTF_8)
+
+        /*if(logLineRotate) {
+            lineCount--
+        };*/
     }
     public fun LogBoringMessage(logMessage :Int, logData :String = "")
     {
@@ -148,6 +157,7 @@ public class Logger(private val Settings :Settings) {
             }
             if(consoleLog) println(loggedString)
             if(fileLog) log.appendText("\n"+loggedString, StandardCharsets.UTF_8)
+            //if(logLineRotate) lineCount++;
         }
     }
     public fun LogCommands(command :String, params :String = "")
@@ -158,6 +168,7 @@ public class Logger(private val Settings :Settings) {
         if(params != "")loggedString += " with parameters ("+params+")"
         if(consoleLog) println(loggedString)
         if(fileLog) log.appendText("\n"+loggedString)
+        //if(logLineRotate) lineCount++;
     }
     public fun LogChat(message: Message)
     {
@@ -169,6 +180,7 @@ public class Logger(private val Settings :Settings) {
 
         if(consoleLog) println(loggedString)
         if(logChat) chatLog.appendText("\n"+loggedString)
+        //if(logLineRotate) chatLineCount++;
     }
     public fun LogConnection(logMessage :Int, logData :String = "")
     {
@@ -190,6 +202,7 @@ public class Logger(private val Settings :Settings) {
             }
             if(consoleLog) println(loggedString)
             if(fileLog) log.appendText("\n"+loggedString, StandardCharsets.UTF_8)
+            //if(logLineRotate) lineCount++;
         }
     }
     public fun LogPlugin(pluginName :String, pluginMessage :String)
@@ -198,12 +211,14 @@ public class Logger(private val Settings :Settings) {
             var loggedString = "["+DateFormat.format(Date())+"] {" + pluginName + "}: " + pluginMessage
             if(consoleLog) println(loggedString)
             if(fileLog) pluginLog.appendText("\n"+loggedString, StandardCharsets.UTF_8)
+            //if(logLineRotate) pluginLineCount++;
         }
 
     }
     public fun LogBoringPluginData(pluginName: String, pluginMessage: String)
     {
         if(logLevel > 1) this.LogPlugin(pluginName, pluginMessage)
+        //if(logLineRotate) pluginLineCount++;
     }
 
     //Setting changing API
@@ -225,47 +240,69 @@ public class Logger(private val Settings :Settings) {
         this.logChat = state
         if(state == true) this.LogMessage(52)
     }
-    public fun ChangeLogFile(fileName :String = "log.txt", folder :String = "logs")
+    public fun ChangeLogFile(fileName :String = "log.txt", folder :String = "logs") :Boolean
     {
-        loadedFile = true
-        logFolder = folder
-        logFileName = fileName
-        log = File(logFolder+"/"+logFileName)
+        try {
+            loadedFile = true
+            logFolder = folder
+            logFileName = fileName
+            log = File(logFolder+"/"+logFileName)
 
-        this.LogMessage(21, folder+"/"+fileName)
+            this.LogMessage(21, folder+"/"+fileName)
+            return true
+        } catch (e :Exception) {
+            loadedFile = false
+            return false
+        }
     }
-    public fun ChangeChatLogFile(fileName: String = "chat.txt", folder :String = "logs")
+    public fun ChangeChatLogFile(fileName: String = "chat.txt", folder :String = "logs") :Boolean
     {
-        logFolder = folder
-        chatLogFile = fileName
-        chatLog = File(logFolder+"/"+logFileName)
-        this.LogMessage(53, folder+"/"+fileName)
-
+        try {
+            logFolder = folder
+            chatLogFile = fileName
+            chatLog = File(logFolder+"/"+logFileName)
+            this.LogMessage(53, folder+"/"+fileName)
+            return true
+        } catch (e :Exception) {
+            return false
+        }
     }
-    public fun ChangePluginLogFile(fileName: String = "plugins.txt", folder :String = "logs")
+    public fun ChangePluginLogFile(fileName: String = "plugins.txt", folder :String = "logs") :Boolean
     {
-        logFolder = folder
-        pluginLogFile = fileName
-        pluginLog = File(logFolder+"/"+pluginLogFile)
-        this.LogMessage(69, folder+"/"+fileName)
-
+        try {
+            logFolder = folder
+            pluginLogFile = fileName
+            pluginLog = File(logFolder+"/"+pluginLogFile)
+            this.LogMessage(69, folder+"/"+fileName)
+            return true
+        } catch(e :Exception){
+            return false
+        }
     }
-    public fun Disable(file :Boolean = true, console: Boolean = true, chat :Boolean = true)
+    public fun Disable(file :Boolean = true, console: Boolean = true, chat :Boolean = true) :Boolean
     {
-        this.LogMessage(18)
-        enableStatus = false
-        if(file)fileLog = false;
-        if(console)consoleLog = false;
-        if(chat)logChat = false;
+        if(enableStatus) {
+            this.LogMessage(18)
+            enableStatus = false
+            if(file)fileLog = false;
+            if(console)consoleLog = false;
+            if(chat)logChat = false;
+            return true
+        }
+        return false
     }
-    public fun Enable(File :Boolean = true, Console: Boolean = true, chat :Boolean = true)
+    public fun Enable(File :Boolean = true, Console: Boolean = true, chat :Boolean = true) :Boolean
     {
-        enableStatus = true
-        if(File && loadedFile)fileLog = true;
-        else if (!loadedFile && Console) this.LogMessage(3)
-        if(Console)consoleLog = true;
-        if(chat)logChat = true;
-        this.LogMessage(19)
+        if(!enableStatus) {
+            enableStatus = true
+            if(File && loadedFile)fileLog = true;
+            else if (!loadedFile && Console) this.LogMessage(3)
+            if(Console)consoleLog = true;
+            if(chat)logChat = true;
+            this.LogMessage(19)
+            return true
+        }
+        return false
     }
     public fun ArchiveOldLogs(log :Boolean = true)
     {
@@ -279,18 +316,26 @@ public class Logger(private val Settings :Settings) {
     public fun Reload() :Boolean
     {
         this.LogMessage(26)
-        this.logFolder :String = Settings.GetSetting("logFolder")
-        this.logFileName :String = Settings.GetSetting("logFile")
-        this.chatLogFile :String = Settings.GetSetting("chatLogFile")
-        this.pluginLogFile :String = Settings.GetSetting("pluginLogFile")
-        this.consoleLog :Boolean = Settings.GetSetting("consoleLog").toBoolean()
-        this.fileLog :Boolean = Settings.GetSetting("fileLog").toBoolean()
-        this.logChat :Boolean = Settings.GetSetting("logChat").toBoolean()
-        this.logPlugins :Boolean = Settings.GetSetting("enablePlugins").toBoolean()
+        this.logFolder = Settings.GetSetting("logFolder")
+        this.logFileName = Settings.GetSetting("logFile")
+        this.chatLogFile = Settings.GetSetting("chatLogFile")
+        this.pluginLogFile = Settings.GetSetting("pluginLogFile")
+        this.consoleLog = Settings.GetSetting("consoleLog").toBoolean()
+        this.fileLog = Settings.GetSetting("fileLog").toBoolean()
+        this.logChat = Settings.GetSetting("logChat").toBoolean()
+        this.logPlugins = Settings.GetSetting("enablePlugins").toBoolean()
+        this.logLineRotate = Settings.GetSetting("logLineRotate").toBoolean()
 
         this.log = File(logFolder+"/"+logFileName)
         this.chatLog = File(logFolder+"/"+chatLogFile)
         this.pluginLog = File(logFolder+"/"+pluginLogFile)
+
+
+        if(this.logLineRotate) {
+            this.lineCount = 0
+            this.chatLineCount = 0
+            this.pluginLineCount = 0
+        }
         if(this.loginit()) {
             this.loadedFile = true
             this.LogMessage(28)
@@ -301,79 +346,100 @@ public class Logger(private val Settings :Settings) {
         }
     }
 
-    //Initializer function, seperated so that it can be properly called from Reload()
+    //Rotate the log files
+    private fun checkLogExtensions(fileName: String)  :String {
+        var tmpLogLocation = ""
+        for(i in 1..maxLogs) {
+            val tmpLog = File(logFolder+"/"+fileName+"."+i.toString())
+            if(!tmpLog.exists()) {
+                tmpLogLocation = tmpLog.toString()
+                break;
+            }
+        }
+        return tmpLogLocation
+    }
+
+    private fun logRotate() :Boolean {
+        var shouldArchive = false
+        if(log.exists()) {
+            //copy old logs
+            var tmpLogLocation = checkLogExtensions("log");
+
+            if (tmpLogLocation == "") {
+                //Archive old logs
+                log.copyTo(File(logFolder+"/log."+maxLogs.toString()))
+                shouldArchive = true
+            } else {
+                //Copy old log to a new place and delete it afterwards
+                log.copyTo(File(tmpLogLocation))
+            }
+            log.delete()
+        } else {
+            File(logFolder).mkdirs()
+        }
+
+        if(chatLog.exists()) {
+            var tmpLogLocation = checkLogExtensions("chat");
+
+            if (tmpLogLocation == "") {
+                //Archive old logs
+                chatLog.copyTo(File(logFolder+"/chat."+maxLogs.toString()))
+                shouldArchive = true
+            } else {
+                //Copy old log to a new place and delete it afterwards
+                chatLog.copyTo(File(tmpLogLocation))
+            }
+            chatLog.delete()
+        }
+        return shouldArchive
+    }
+    private fun chatLogRotate() :Boolean {
+        var shouldArchive = false
+        if(chatLog.exists()) {
+            var tmpLogLocation = checkLogExtensions("chat");
+
+            if (tmpLogLocation == "") {
+                //Archive old logs
+                chatLog.copyTo(File(logFolder+"/chat."+maxLogs.toString()))
+                shouldArchive = true
+            } else {
+                //Copy old log to a new place and delete it afterwards
+                chatLog.copyTo(File(tmpLogLocation))
+            }
+            chatLog.delete()
+        }
+        return shouldArchive
+    }
+    private fun pluginLogRotate() :Boolean {
+        var shouldArchive = false
+        if(pluginLog.exists()) {
+            var tmpLogLocation = checkLogExtensions("plugins");
+
+            if (tmpLogLocation == "") {
+                //Archive old logs
+                chatLog.copyTo(File(logFolder+"/plugins."+maxLogs.toString()))
+                shouldArchive = true
+            } else {
+                //Copy old log to a new place and delete it afterwards
+                chatLog.copyTo(File(tmpLogLocation))
+            }
+            pluginLog.delete()
+        }
+        return shouldArchive
+    }
+
+    //Initializer function, separated so that it can be properly called from Reload()
     private fun loginit() :Boolean
     {
         try {
             if(logRotate) {
-                var shouldArchive = false
-                if(log.exists()) {
-                    //copy old logs
-                    var tmpLogLocation = "";
-                    for(i in 1..maxLogs) {
-                        val tmpLog = File(logFolder+"/log."+i.toString())
-                        if(!tmpLog.exists()) {
-                            tmpLogLocation = tmpLog.toString()
-                            break;
-                        }
-                    }
 
-                    if (tmpLogLocation == "") {
-                        //Archive old logs
-                        log.copyTo(File(logFolder+"/log."+maxLogs.toString()))
-                        shouldArchive = true
-                    } else {
-                        //Copy old log to a new place and delete it afterwards
-                        log.copyTo(File(tmpLogLocation))
-                    }
-                    log.delete()
-                } else {
-                    File(logFolder).mkdirs()
-                }
+                var shouldArchive = logRotate()
+                var shouldChatArchive = chatLogRotate()
+                var shouldPluginArchive = pluginLogRotate()
 
-                if(chatLog.exists()) {
-                    var tmpLogLocation = ""
-                    for (i in 1..maxLogs) {
-                        val tmpLog = File(logFolder+"/chat."+i.toString())
-                        if(!tmpLog.exists()) {
-                            tmpLogLocation = tmpLog.toString()
-                            break;
-                        }
-                    }
-
-                    if (tmpLogLocation == "") {
-                        //Archive old logs
-                        chatLog.copyTo(File(logFolder+"/chat."+maxLogs.toString()))
-                        shouldArchive = true
-                    } else {
-                        //Copy old log to a new place and delete it afterwards
-                        chatLog.copyTo(File(tmpLogLocation))
-                    }
-                    chatLog.delete()
-                }
-
-                if(pluginLog.exists()) {
-                    var tmpLogLocation = ""
-                    for (i in 1..maxLogs) {
-                        val tmpLog = File(logFolder+"/plugins."+i.toString())
-                        if(!tmpLog.exists()) {
-                            tmpLogLocation = tmpLog.toString()
-                            break;
-                        }
-                    }
-
-                    if (tmpLogLocation == "") {
-                        //Archive old logs
-                        chatLog.copyTo(File(logFolder+"/plugins."+maxLogs.toString()))
-                        shouldArchive = true
-                    } else {
-                        //Copy old log to a new place and delete it afterwards
-                        chatLog.copyTo(File(tmpLogLocation))
-                    }
-                    pluginLog.delete()
-                }
-
-                if(shouldArchive && logArchiving) this.ArchiveOldLogs(false)
+                //TODO: Archive only the specific log files
+                if((shouldArchive || shouldPluginArchive || shouldChatArchive) && logArchiving) this.ArchiveOldLogs(false)
             }
         } catch (e: Exception) {
             return false

@@ -22,7 +22,6 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
         } else {
             Logger.LogMessage(13)
         }
-
     }
 
     //Daemon functions
@@ -61,7 +60,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
             return false
         }
     }
-    private fun Demon() //Yes, the spelling's on purpose
+    private fun Demon()
     {
         // Create a simple daemon listening on a specified port
         val socket = ServerSocket(port)
@@ -85,6 +84,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
         // Await input and react to it
         var input :String
 
+        // Listen for input
         while(true)  {
             for(msg in ThreadController.GetCLIBuffer()) {
                 out.println(msg)
@@ -98,7 +98,7 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
 
             // Separate command from parameters and log it
             var command :List<String> = input.split(" ")
-            if(command.size() > 1) {
+            if(command.size > 1) {
                 Logger.LogCommands(command[0], input.substring(input.indexOf(" ")+1))
             } else {
                 Logger.LogCommands(input)
@@ -107,7 +107,6 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
             try {
                 // Execute commands
                 when(command[0].toLowerCase()) {
-                    //TODO: have all of the functions return some sort of indication of their actions
                     ":quit" -> { // Disconnect
                         if(ConfirmAction(out, _in))  {
                             Logger.LogMessage(16, "Session lasted " + (Settings.getCurrentTime() - SessionStartTime).toString() + " seconds")
@@ -135,23 +134,29 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     }
                     ":shutdown" -> {
                         if(ConfirmAction(out, _in)) {
-                            Logger.LogMessage(16, "Session lasted " + Settings.getCurrentTime().toString() + " seconds")
-                            Logger.LogMessage(55)
-                            out.println("Shutdown initiated. Good bye!")
-                            connectionActive = false
+                            try {
+                                Logger.LogMessage(16, "Session lasted " + (Settings.getCurrentTime() - SessionStartTime).toString() + " seconds")
+                                Logger.LogMessage(55)
+                                out.println("Shutdown initiated. Good bye!")
+                                connectionActive = false
 
-                            Box.stop()
-                            Plugins.stop()
-                            this.stop()
+                                Box.stop()
+                                Plugins.stop()
+                                this.stop()
+                            } catch (e :Exception){
+                                System.exit(0);
+                            }
+
                         }
                     }
                     ":reload" -> {
                         if(ConfirmAction(out, _in)) {
-                            this.Reload()
+                            if(this.Reload()) out.println("Reload successful!")
+                            else out.println("Error while reloading the CLI module (how can you still see this?)")
                         }
                     }
                     ":help" -> {
-                        out.println("Please read CLI.kt for full command list.")
+                        out.println("Please refer to https://github.com/zingmars/Cbox-bot/blob/master/misc/cli.txt for full command list.")
                     }
                     "settings.savesettings" -> {
                         Settings.SaveSettings()
@@ -162,15 +167,24 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                         out.println("Settings reloaded successfully. Please reload modules for the changes to have an effect.")
                     }
                     "settings.getsetting" -> {
-                        out.println(command[1] + ":" + Settings.GetSetting(command[1]))
+                        if(command[1] != "") out.println(command[1] + ":" + Settings.GetSetting(command[1]))
+                        else out.println("Syntax: settings.getsetting <settingname>. All trailing arguments will be ignored");
                     }
                     "settings.setsetting" -> {
-                        Settings.SetSetting(command[1], command[2])
-                        out.println(command[1] + " set to " + command[2])
+                        if(command[1] != "" && command[2] != "") {
+                            Settings.SetSetting(command[1], command[2])
+                            out.println(command[1] + " set to " + command[2])
+                        } else {
+                            out.println("Syntax: settings.setsetting <name> <value>. All trailing arguments will be ignored, setting values mustn't contain any spaces.")
+                        }
                     }
                     "settings.changesettingsfile" -> {
-                        if(ConfirmAction(out, _in)) Settings.ChangeSettingsFile(command[1])
-                        out.println("Settings reloaded successfully. Please reload modules for the changes to have an effect.")
+                        if(command[1] != "") {
+                            if(ConfirmAction(out, _in)) Settings.ChangeSettingsFile(command[1])
+                            out.println("Settings reloaded successfully. Please reload modules for the changes to have an effect.")
+                        } else {
+                            out.println("Syntax: settings.changesettingsfile <filename>. All trailing arguments will be ignored.")
+                        }
                     }
                     "settings.getSettings" -> {
                         out.println(Settings.GetAllSettings())
@@ -179,27 +193,35 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                         if(ConfirmAction(out, _in)) {
                             var pam1 = true
                             var pam2 = true
+                            var pam3 = true
                             try{
                                 pam1 = command[1].toBoolean()
                                 pam2 = command[2].toBoolean()
-
+                                pam3 = command[3].toBoolean()
                             } catch (ex: Exception) {
                             }
-                            Logger.Disable(pam1, pam2)
-                            out.println("Logging disabled")
+                            if(Logger.Disable(pam1, pam2, pam3)) {
+                                out.println("Logging disabled")
+                            } else {
+                                out.println("Either an error occurred, or logging was already disabled");
+                            }
                         }
                     }
                     "logger.enable" -> {
                         var pam1 = true
                         var pam2 = true
+                        var pam3 = true
                         try{
                             pam1 = command[1].toBoolean()
                             pam2 = command[2].toBoolean()
-
+                            pam3 = command[3].toBoolean()
                         } catch (ex: Exception) {
                         }
-                        Logger.Enable(pam1, pam2)
-                        out.println("Logging enabled")
+                        if(Logger.Enable(pam1, pam2, pam3)) {
+                            out.println("Logging enabled")
+                        } else {
+                            out.println("Either an error occurred, or logging was already enabled");
+                        }
                     }
                     "logger.archive" -> {
                         if(ConfirmAction(out,_in)) {
@@ -208,24 +230,39 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                         }
                     }
                     "logger.toconsole" -> {
-                        Logger.ChangeConsoleLoggingState(command[1].toBoolean())
-                        out.println("Changed console logging behaviour")
+                        if(command[1] != "") {
+                            Logger.ChangeConsoleLoggingState(command[1].toBoolean())
+                            out.println("Changed console logging behaviour")
+                        } else {
+                            out.println("Syntax: logger.toconsole <true:false>")
+                        }
                     }
                     "logger.tofile" -> {
-                        Logger.ChangeFileLoggingState(command[1].toBoolean())
-                        out.println("Changed file logging behaviour")
+                        if(command[1] != "") {
+                            Logger.ChangeFileLoggingState(command[1].toBoolean())
+                            out.println("Changed file logging behaviour")
+                        } else {
+                            out.println("Syntax: logger.tofile <true:false>")
+                        }
                     }
                     "logger.chattofile" -> {
-                        Logger.ChangeChatLoggingState(command[1].toBoolean())
-                        out.println("Changed chat logging behaviour")
+                        if(command[1] != "") {
+                            Logger.ChangeChatLoggingState(command[1].toBoolean())
+                            out.println("Changed chat logging behaviour")
+                        } else {
+                            out.println("Syntax: logger.chattofile <true:false>")
+                        }
                     }
                     "logger.changelogfile" -> {
                         if(ConfirmAction(out, _in)) {
                             var pam1 = if(command[1] == "") Settings.GetSetting("logFile") else command[1]
                             var pam2 = if(command[2] == "") Settings.GetSetting("logFolder") else command[2]
 
-                            Logger.ChangeLogFile(pam1, pam2)
-                            out.println("Changed currently active log file")
+                            if(Logger.ChangeLogFile(pam1, pam2)) {
+                                out.println("Changed currently active log file")
+                            } else {
+                                out.println("Could not change the log file. Logging disabled.")
+                            }
                         }
                     }
                     "logger.changechatlogfile" -> {
@@ -233,8 +270,11 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                             var pam1 = if(command[1] == "") Settings.GetSetting("chatLogFile") else command[1]
                             var pam2 = if(command[2] == "") Settings.GetSetting("logFolder") else command[2]
 
-                            Logger.ChangeChatLogFile(pam1, pam2)
-                            out.println("Changed currently active chat log file")
+                            if(Logger.ChangeChatLogFile(pam1, pam2)) {
+                                out.println("Changed currently active chat log file")
+                            } else {
+                                out.println("Could not change the log file. Chat logging disabled.")
+                            }
                         }
                     }
                     "logger.changepluginlogfile" -> {
@@ -242,8 +282,11 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                             var pam1 = if(command[1] == "") Settings.GetSetting("chatLogFile") else command[1]
                             var pam2 = if(command[2] == "") Settings.GetSetting("logFolder") else command[2]
 
-                            Logger.ChangePluginLogFile(pam1, pam2)
-                            out.println("Changed currently active chat log file")
+                            if(Logger.ChangePluginLogFile(pam1, pam2)) {
+                                out.println("Changed currently active plugin log file")
+                            } else {
+                                out.println("Could not change the log file. Plugin logging disabled.")
+                            }
                         }
                     }
                     "logger.reload" -> {
@@ -271,24 +314,41 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     }
                     "box.relog" -> {
                         out.println("Relogging with given credentials (username, password, avatarURL) and reloading the box")
-                        try {
-                            Box.ChangeCredentials(command[1], command[2], command[3])
-                        } catch (e: Exception) {
-                            Box.ChangeCredentials(command[1], command[2], "")
+                        if(command[1] != "" && command[2] != "") {
+                            try {
+                                Box.ChangeCredentials(command[1], command[2], command[3])
+                            } catch (e: Exception) {
+                                Box.ChangeCredentials(command[1], command[2], "")
+                            }
+                            ThreadController.AddToMainBuffer("Restart.Box")
+                            out.println("Please wait...")
+                            Thread.sleep(Settings.GetSetting("refreshRate").toLong()*3)
+                        } else {
+                            out.println("Syntax: box.relog <username> <password> <optional: avatar URL>")
                         }
-                        ThreadController.AddToMainBuffer("Restart.Box")
-                        out.println("Please wait...")
-                        Thread.sleep(Settings.GetSetting("refreshRate").toLong()*3)
                     }
                     "box.refreshrate" -> {
-                        Box.changeRefreshRate(command[1].toLong())
-                        out.println("Box refresh rate changed")
+                        if(command[1] != "") {
+                            Box.changeRefreshRate(command[1].toLong())
+                            out.println("Box refresh rate changed")
+                        } else {
+
+                        }
                     }
                     "box.getip" -> {
-                        out.println("Response: " + Box.getIP(command[1]))
+                        if(command[1] != "") {
+                            out.println("Response: " + Box.getIP(command[1]))
+                        }
+                        else {
+                            out.println("Syntax: box.getip <optional: messageID>")
+                        }
                     }
                     "box.send" -> {
-                        Box.SendMessage(command.join(" ").replace("send", ""))
+                        if(Box.SendMessage(command.joinToString(" ").replace("send", ""))) {
+                            out.println("Message sent successfully")
+                        } else {
+                            out.println("Could not send your message. Are you logged in?")
+                        }
                     }
                     "plugins.reload" -> {
                         ThreadController.AddToMainBuffer("Restart.Plugins")
@@ -296,50 +356,76 @@ public class CLI (private val Settings :Settings, private val Logger :Logger, pr
                     "plugins.disable" -> {
                         if(ConfirmAction(out, _in)) {
                             Plugins.Disable()
+                            out.println("Plugins disabled.")
                         }
                     }
                     "plugins.enable" -> {
                         if(ConfirmAction(out, _in)) {
                             Plugins.Enable()
+                            out.println("Plugins enabled.")
                         }
                     }
                     "plugins.refreshrate" -> {
-                        Plugins.changeRefreshRate(command[1].toLong())
+                        if(command[1] != "") {
+                            Plugins.changeRefreshRate(command[1].toLong())
+                            out.println("Refresh rate changed.")
+                        } else {
+                            out.println("Syntax: plugins.refreshrate <miliseconds>")
+                        }
                     }
                     "plugins.unload" -> {
-                        if(ConfirmAction(out, _in)) {
-                            out.println(Plugins.unloadPlugin(command[1]))
+                        if(command[1] != "") {
+                            if(ConfirmAction(out, _in)) {
+                                out.println(Plugins.unloadPlugin(command[1]))
+                            }
+                        } else {
+                            out.println("Syntax: plugins.unload <plugin name>")
                         }
                     }
                     "plugins.load" -> {
                         //TODO: Bug - the plugin needs to be correctly capitalised or it will crash the thread
-                        out.println("Warning: There's currently a bug that will unrecoverably crash the CLI module if you misspell the plugin's name or write it in the wrong CaSe.")
-                        if(ConfirmAction(out, _in)) {
-                            Plugins.LoadPlugin(command[1]+".kt")
+                        if(command[1] != "") {
+                            out.println("Warning: There's currently a bug that will unrecoverably crash the CLI module if you misspell the plugin's name or write it in the wrong CaSe.")
+                            if(Plugins.LoadPlugin(command[1]+".kt")) {
+                                out.println("Plugin loaded successfully")
+                            } else {
+                                out.println("Plugin loading failed")
+                            }
+                        } else {
+                            out.println("Syntax: plugins.load <plugin name>")
                         }
                     }
-                    "plugins.reloadplugin" -> {
-                        out.println("Warning: There's currently a bug that will unrecoverably crash the CLI module if you misspell the plugin's name or write it in the wrong CaSe.")
-                        if(ConfirmAction(out, _in)) {
-                            Plugins.reloadPlugin(command[1])
+                    "plugins.reload" -> {
+                        if(command[1] != "") {
+                            if(Plugins.reloadPlugin(command[1])) {
+                                out.println("Plugin reloaded successfully")
+                            } else {
+                                out.println("Plugin reloading failed")
+                            }
+                        } else {
+                            out.println("Syntax: plugins.reload <plugin name>")
                         }
                     }
                     "plugins.savesettings" -> {
                         Plugins.SavePluginSettings()
                         out.println("Saved")
                     }
-                    "plugins.getSettings" -> {
+                    "plugins.getsettings" -> {
                         out.println(Plugins.GetAllSettings())
                     }
-                    "plugins.setSetting" -> {
-                        Plugins.SetSetting(command[1], command[2])
-                        out.println(command[1] + " set to " + command[2])
+                    "plugins.setsetting" -> {
+                        if(command[1] != "" && command[2] != "") {
+                            Plugins.SetSetting(command[1], command[2])
+                            out.println(command[1] + " set to " + command[2])
+                        }  else {
+                            out.println("Syntax: plugins.setsetting <name> <value>")
+                        }
                     }
                     "plugins.command" -> {
                         if (command[1] == "" || command[2] == "") {
                             out.println("Wrong syntax. Syntax - plugins.command <pluginname> <command>")
                         } else {
-                            var param = command.join(",")
+                            var param = command.joinToString(",")
                             param = param.substring(param.indexOf(",")+1) //Pluginname
                             param = param.substring(param.indexOf(",")+1) //Command
                             out.println(Plugins.executeFunction(command[1], param))

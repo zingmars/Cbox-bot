@@ -14,10 +14,10 @@ public class AbuserList : BasePlugin()
     {
         var message = buffer.message.split(" ")
         when(message[0].toLowerCase()) {
-            "@ignorelist" -> {
+            "!ignorelist" -> {
                 var ignored = settings?.GetSetting("AbuserList") as String
                 var isAdmin = handler?.isPluginAdmin(buffer.userName) as Boolean
-                var commandSize = message.size()
+                var commandSize = message.size
                 if(commandSize == 1 || message[1] == "") {
                     controller?.AddToBoxBuffer("Users banned from using the bot: " + ignored)
                 } else if(commandSize > 1) {
@@ -59,7 +59,11 @@ public class AbuserList : BasePlugin()
     {
         var ignorelist = settings?.GetSetting("AbuserList") as String
         if(!ignorelist.contains(name)) {
-            var finalstring = ignorelist + if(ignorelist.contains(",")) "," + name
+            var finalstring = ignorelist
+            if(ignorelist.length > 1) {
+                finalstring +=  ","
+            }
+            finalstring += name
             settings?.SetSetting("AbuserList", finalstring)
             logger?.LogPlugin(this.pluginName as String, "User ignored: " + name)
             return true
@@ -70,7 +74,7 @@ public class AbuserList : BasePlugin()
     {
         var ignorelist = settings?.GetSetting("AbuserList") as String
         if(ignorelist.contains(name)) {
-            ignorelist = ignorelist.substring(0, ignorelist.indexOf(name)-1) + ignorelist.substring(ignorelist.indexOf(name)+name.length())
+            ignorelist = ignorelist.substring(0, ignorelist.indexOf(name)-1) + ignorelist.substring(ignorelist.indexOf(name)+name.length)
             settings?.SetSetting("AbuserList", ignorelist)
             logger?.LogPlugin(this.pluginName as String, "Removed ignored user: " + name)
             return true

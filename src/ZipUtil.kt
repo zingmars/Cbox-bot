@@ -28,7 +28,7 @@ public class ZipUtil(private val SOURCE_FOLDER :String, private val OUTPUT_ZIP_F
     {
         var source :String
         try {
-            source = SOURCE_FOLDER.substring(SOURCE_FOLDER.lastIndexOf("\\") + 1, SOURCE_FOLDER.length())
+            source = SOURCE_FOLDER.substring(SOURCE_FOLDER.lastIndexOf("\\") + 1, SOURCE_FOLDER.length)
         } catch (e: Exception) {
             source = SOURCE_FOLDER
         }
@@ -46,7 +46,7 @@ public class ZipUtil(private val SOURCE_FOLDER :String, private val OUTPUT_ZIP_F
         var zos: ZipOutputStream? = null
         try {
             try {
-                source = SOURCE_FOLDER.substring(SOURCE_FOLDER.lastIndexOf("\\") + 1, SOURCE_FOLDER.length())
+                source = SOURCE_FOLDER.substring(SOURCE_FOLDER.lastIndexOf("\\") + 1, SOURCE_FOLDER.length)
             } catch (e: Exception) {
                 source = SOURCE_FOLDER
             }
@@ -103,6 +103,6 @@ public class ZipUtil(private val SOURCE_FOLDER :String, private val OUTPUT_ZIP_F
     }
     private fun generateZipEntry(file: String): String
     {
-        return file.substring(SOURCE_FOLDER.length(), file.length())
+        return file.substring(SOURCE_FOLDER.length, file.length)
     }
 }
