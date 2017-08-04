@@ -21,6 +21,16 @@ And probably much more...
 When looking around the webs I found this language, Kotlin. Now, I have a project coming up that involves building an Android app, and not being on good terms with Java myself, I decided to build something simple to understand it's basics (this is why you'll find stuff like classloader, socket server etc. in this project). I've also wanted to build something that connects to a chat box that a community I frequent uses; I've tried making a desktop client before before, but I didn't finish it out of laziness. It should however in theory work with any cbox.ws based chatbox, although I haven't tested it, so I can't vouch for it.
 
 -----
+# How to run?
+
+You have two options - use the compiled release or run the latest version through IntelliJ IDEA. To do the latter, just [download the IDE](https://www.jetbrains.com/idea/download/#section=windows) and follow the instructions below. If running the release version, just make sure JAVA is installed, [download the release](https://github.com/zingmars/Cbox-bot/releases), and run the `Run.bat` (On Windows) or `Run.sh` (On Linux) file.
+
+To get the `server ID`, `box ID` and `box tag`, you need to do the following -
+
+  * If you have the `my.cbox.ws` URL, it will usually look like this - `http://my.cbox.ws/~<server>-<box ID>-<Tag>`. So when it asks you for the information, just enter the data in the same sequence as they appear in the URL.
+  * If you don't have the `my.cbox.ws` URL (i.e. when you have an embedded chatbox), you'll need to open the chatbox in the browser, open the developer tools (usually bound to `F12`) and open the Network tab, then look for the requests to cbox.ws. On Chrome the entry will have something like `?sec=<action>&boxid=<id>&boxtag=<tag>&_v=<version>` in the name column. Simply click on the entry and locate the URL it's making the request to. It will usually look like this - `https://www<server ID>.cbox.ws/box/?sec=<action>&boxid=<box id>&boxtag=<tag>&_v=<version>`. What you need is the `server ID`, `box ID` and the `tag`. Just enter it when prompted. 
+
+-----
 # Setup guide (using IntelliJ IDEA):
 
 1) Open File->Settings->Plugins, look for Kotlin, download and install it
